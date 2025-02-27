@@ -1,5 +1,6 @@
 
 const Koa = require('koa');
+const cors = require('koa2-cors');
 const KoaStatic = require('koa-static');
 const KoaBody = require('koa-body');
 const Session = require('koa-session');
@@ -7,6 +8,13 @@ const Session = require('koa-session');
 let { Port, staticDir } = require('./config');
 
 let app = new Koa();
+
+// 使用koa2-cors中间件
+app.use(cors({
+  origin: 'http://localhost:8080', // 允许的前端地址
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE'], // 允许的HTTP方法
+  allowHeaders: ['Content-Type', 'Authorization'] // 允许的请求头
+}));
 
 // 处理异常
 const error = require('./app/middleware/error');

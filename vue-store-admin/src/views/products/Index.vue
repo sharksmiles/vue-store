@@ -6,33 +6,37 @@
         <el-button style="float: right" type="primary" @click="handleAdd">添加商品</el-button>
       </div>
       
-      <el-table :data="products" border>
-        <el-table-column prop="id" label="ID" width="80"></el-table-column>
+      <el-table :data="products" height="70vh">
+        <el-table-column prop="product_id" label="ID" width="80"></el-table-column>
         <el-table-column label="商品图片" width="100">
           <template slot-scope="scope">
             <el-image 
-              :src="scope.row.image || 'https://via.placeholder.com/50'"
-              :preview-src-list="[scope.row.image]"
+              :src="`http://localhost:3600/${scope.row.product_picture}`"
+              :preview-src-list="[`http://localhost:3600/${scope.row.product_picture}`]"
               fit="cover"
               style="width: 50px; height: 50px">
             </el-image>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="商品名称"></el-table-column>
-        <el-table-column prop="price" label="价格">
+        <el-table-column prop="product_name" label="商品名称"></el-table-column>
+        <el-table-column prop="product_price" label="价格">
           <template slot-scope="scope">
-            ¥{{ scope.row.price }}
+            ¥{{ scope.row.product_price }}
           </template>
         </el-table-column>
-        <el-table-column prop="stock" label="库存"></el-table-column>
-        <el-table-column prop="status" label="状态">
+        <el-table-column prop="product_num" label="库存"></el-table-column>
+        <el-table-column prop="product_status" label="状态">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.status === 1 ? 'success' : 'info'">
-              {{ scope.row.status === 1 ? '上架' : '下架' }}
+            <el-tag :type="scope.row.product_status === 1 ? 'success' : 'info'">
+              {{ scope.row.product_status === 1 ? '上架' : '下架' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间"></el-table-column>
+        <el-table-column prop="product_create_time" label="创建时间">
+          <template slot-scope="scope">
+            {{ scope.row.product_create_time?new Date(scope.row.product_create_time).toLocaleString() : '-' }}
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="200">
           <template slot-scope="scope">
             <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
@@ -56,41 +60,41 @@
             :show-file-list="false"
             :before-upload="beforeUpload"
             :http-request="handleUpload">
-            <img v-if="productForm.image" :src="productForm.image" class="product-image">
+            <img v-if="productForm.product_picture" :src="`http://localhost:3600/${productForm.product_picture}`" class="product-image">
             <i v-else class="el-icon-plus product-uploader-icon"></i>
           </el-upload>
         </el-form-item>
-        <el-form-item label="商品名称" prop="name">
-          <el-input v-model="productForm.name"></el-input>
+        <el-form-item label="商品名称" prop="product_name">
+          <el-input v-model="productForm.product_name"></el-input>
         </el-form-item>
-        <el-form-item label="价格" prop="price">
+        <el-form-item label="价格" prop="product_price">
           <el-input-number 
-            v-model="productForm.price" 
+            v-model="productForm.product_price" 
             :precision="2" 
             :step="0.1" 
             :min="0">
           </el-input-number>
         </el-form-item>
-        <el-form-item label="库存" prop="stock">
+        <el-form-item label="库存" prop="product_num">
           <el-input-number 
-            v-model="productForm.stock" 
+            v-model="productForm.product_num" 
             :min="0" 
             :precision="0">
           </el-input-number>
         </el-form-item>
-        <el-form-item label="状态" prop="status">
+        <el-form-item label="状态" prop="product_status">
           <el-switch
-            v-model="productForm.status"
+            v-model="productForm.product_status"
             :active-value="1"
             :inactive-value="0"
             active-text="上架"
             inactive-text="下架">
           </el-switch>
         </el-form-item>
-        <el-form-item label="描述" prop="description">
+        <el-form-item label="描述" prop="product_intro">
           <el-input 
             type="textarea" 
-            v-model="productForm.description"
+            v-model="productForm.product_intro"
             :rows="3">
           </el-input>
         </el-form-item>
@@ -104,7 +108,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 
 export default {
   name: 'ProductsList',
@@ -115,23 +118,23 @@ export default {
       isEdit: false,
       loading: false,
       productForm: {
-        id: null,
-        name: '',
-        price: 0,
-        stock: 0,
-        status: 1,
-        description: '',
-        image: ''
+        product_id: null,
+        product_name: '',
+        product_price: 0,
+        product_num: 0,
+        product_status: 1,
+        product_intro: '',
+        product_picture: ''
       },
       rules: {
-        name: [
+        product_name: [
           { required: true, message: '请输入商品名称', trigger: 'blur' },
           { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
         ],
-        price: [
+        product_price: [
           { required: true, message: '请输入价格', trigger: 'blur' }
         ],
-        stock: [
+        product_num: [
           { required: true, message: '请输入库存', trigger: 'blur' }
         ]
       }
@@ -148,8 +151,8 @@ export default {
   methods: {
     async fetchProducts() {
       try {
-        const response = await axios.get('/api/products')
-        this.products = response.data.data
+        const response = await this.$axios.post('/product/getAllProduct')
+        this.products = response.data.Product
       } catch (error) {
         this.$message.error('获取商品列表失败')
       }
@@ -168,7 +171,7 @@ export default {
         await this.$confirm('确认删除该商品?', '提示', {
           type: 'warning'
         })
-        await axios.delete(`/api/products/${row.id}`)
+        await this.$axios.post('/product/deleteProduct', { product_id: row.product_id })
         this.$message.success('删除成功')
         this.fetchProducts()
       } catch (error) {
@@ -199,12 +202,12 @@ export default {
         
         // 实际项目中这里应该调用真实的上传接口
         // const response = await axios.post('/api/upload', formData)
-        // this.productForm.image = response.data.url
+        // this.productForm.product_picture = response.data.url
 
         // 使用 FileReader 在本地预览图片
         const reader = new FileReader()
         reader.onload = (e) => {
-          this.productForm.image = e.target.result
+          this.productForm.product_picture = e.target.result
         }
         reader.readAsDataURL(options.file)
       } catch (error) {
@@ -214,13 +217,13 @@ export default {
     resetForm() {
       this.$refs.productForm?.resetFields()
       this.productForm = {
-        id: null,
-        name: '',
-        price: 0,
-        stock: 0,
-        status: 1,
-        description: '',
-        image: ''
+        product_id: null,
+        product_name: '',
+        product_price: 0,
+        product_num: 0,
+        product_status: 1,
+        product_intro: '',
+        product_picture: ''
       }
     },
     submitForm() {
@@ -229,10 +232,10 @@ export default {
           this.loading = true
           try {
             if (this.isEdit) {
-              await axios.put(`/api/products/${this.productForm.id}`, this.productForm)
+              await this.$axios.post('/product/updateProduct', this.productForm)
               this.$message.success('更新成功')
             } else {
-              await axios.post('/api/products', this.productForm)
+              await this.$axios.post('/product/addProduct', this.productForm)
               this.$message.success('添加成功')
             }
             this.dialogVisible = false

@@ -3,14 +3,15 @@ import Mock from 'mockjs'
 // 商品数据
 Mock.mock('/api/products', 'get', {
   'data|10': [{
-    'id|+1': 1,
-    'name': '@ctitle(5, 10)',
-    'price|100-1000.2': 100,
-    'stock|10-100': 10,
-    'status|1': [1, 0],  // 1: 上架, 0: 下架
-    'description': '@cparagraph(1, 3)',
-    'createTime': '@datetime',
-    'image': '@image(200x200)'  // 添加图片字段
+    'product_id|+1': 1,
+    'product_name': '@ctitle(5, 10)',
+    'product_price|100-1000.2': 100,
+    'product_selling_price|100-1000.2': 100,
+    'product_num|10-100': 10,
+    'product_status|1': [1, 0],  // 1: 上架, 0: 下架
+    'product_intro': '@cparagraph(1, 3)',
+    'product_create_time': '@datetime',
+    'product_picture': '@image(200x200)'  // 添加图片字段
   }]
 })
 

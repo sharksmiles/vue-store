@@ -58,5 +58,20 @@ module.exports = {
   GetDetailsPicture: async (productID) => {
     const sql = "select * from product_picture where product_id = ? ";
     return await db.query(sql, productID);
+  },
+  // 连接数据库,添加商品
+  AddProduct: async (product) => {
+    const sql = "insert into product set ?";
+    return await db.query(sql, product);
+  },
+  // 连接数据库,修改商品
+  UpdateProduct: async (product) => {
+    const sql = "update product set ? where product_id = ?";
+    return await db.query(sql, product);
+  },
+  // 连接数据库,删除商品
+  DeleteProduct: async (productID) => {
+    const sql = "delete from product where product_id = ?";
+    return await db.query(sql, productID);
   }
 }

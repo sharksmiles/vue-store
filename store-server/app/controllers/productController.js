@@ -1,23 +1,22 @@
-
 const productDao = require('../models/dao/productDao');
 module.exports = {
   /**
    * 获取商品分类
    * @param {Object} ctx
    */
-  GetCategory: async ctx => {
+  GetCategory: async (ctx) => {
     const category = await productDao.GetCategory();
 
     ctx.body = {
       code: '001',
       category
-    }
+    };
   },
   /**
    * 根据商品分类名称获取首页展示的商品信息
    * @param {Object} ctx
    */
-  GetPromoProduct: async ctx => {
+  GetPromoProduct: async (ctx) => {
     let { categoryName } = ctx.request.body;
     // 根据商品分类名称获取分类id
     const categoryID = await productDao.GetCategoryId(categoryName);
@@ -27,13 +26,13 @@ module.exports = {
     ctx.body = {
       code: '001',
       Product
-    }
+    };
   },
   /**
    * 根据商品分类名称获取热门商品信息
    * @param {Object} ctx
    */
-  GetHotProduct: async ctx => {
+  GetHotProduct: async (ctx) => {
     let { categoryName } = ctx.request.body;
     const categoryID = [];
 
@@ -48,13 +47,13 @@ module.exports = {
     ctx.body = {
       code: '001',
       Product
-    }
+    };
   },
   /**
    * 分页获取所有的商品信息
    * @param {Object} ctx
    */
-  GetAllProduct: async ctx => {
+  GetAllProduct: async (ctx) => {
     let { currentPage, pageSize } = ctx.request.body;
     // 计算开始索引
     const offset = (currentPage - 1) * pageSize;
@@ -65,18 +64,22 @@ module.exports = {
       code: '001',
       Product,
       total
-    }
+    };
   },
   /**
    * 根据分类id,分页获取商品信息
    * @param {Object} ctx
    */
-  GetProductByCategory: async ctx => {
+  GetProductByCategory: async (ctx) => {
     let { categoryID, currentPage, pageSize } = ctx.request.body;
     // 计算开始索引
     const offset = (currentPage - 1) * pageSize;
     // 分页获取该分类的商品信息
-    const Product = await productDao.GetProductByCategory(categoryID, offset, pageSize);
+    const Product = await productDao.GetProductByCategory(
+      categoryID,
+      offset,
+      pageSize
+    );
     // 获取该分类所有的商品数量,用于前端分页计算
     const total = (await productDao.GetProductByCategory(categoryID)).length;
 
@@ -84,13 +87,13 @@ module.exports = {
       code: '001',
       Product,
       total
-    }
+    };
   },
   /**
    * 根据搜索条件,分页获取商品信息
    * @param {Object} ctx
    */
-  GetProductBySearch: async ctx => {
+  GetProductBySearch: async (ctx) => {
     let { search, currentPage, pageSize } = ctx.request.body;
     // 计算开始索引
     const offset = (currentPage - 1) * pageSize;
@@ -104,15 +107,20 @@ module.exports = {
       // 如果搜索条件为某个分类名称,直接返回该分类的商品信息
       if (search == category[i].category_name) {
         // 获取该分类的商品信息
-        Product = await productDao.GetProductByCategory(category[i].category_id, offset, pageSize);
+        Product = await productDao.GetProductByCategory(
+          category[i].category_id,
+          offset,
+          pageSize
+        );
         // 获取该分类所有的商品数量,用于前端分页计算
-        total = (await productDao.GetProductByCategory(category[i].category_id)).length;
+        total = (await productDao.GetProductByCategory(category[i].category_id))
+          .length;
 
         ctx.body = {
           code: '001',
           Product,
           total
-        }
+        };
         return;
       }
     }
@@ -125,34 +133,118 @@ module.exports = {
       code: '001',
       Product,
       total
-    }
+    };
   },
   /**
    * 根据商品id,获取商品详细信息
    * @param {Object} ctx
    */
-  GetDetails: async ctx => {
+  GetDetails: async (ctx) => {
     let { productID } = ctx.request.body;
 
     const Product = await productDao.GetProductById(productID);
 
     ctx.body = {
       code: '001',
-      Product,
-    }
+      Product
+    };
   },
   /**
    * 根据商品id,获取商品图片,用于食品详情的页面展示
    * @param {Object} ctx
    */
-  GetDetailsPicture: async ctx => {
+  GetDetailsPicture: async (ctx) => {
     let { productID } = ctx.request.body;
 
     const ProductPicture = await productDao.GetDetailsPicture(productID);
 
     ctx.body = {
       code: '001',
-      ProductPicture,
-    }
+      ProductPicture
+    };
+  },
+  /**
+   * 添加商品
+   * @param {Object} ctx
+   */
+  AddProduct: async (ctx) => {
+    let {
+      product_name,
+      product_price,
+      product_num,
+      product_status,
+      product_picture,
+      product_intro
+    } = ctx.request.body;
+    // 获取当前时间
+    const currentTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    // 添加商品
+    const Product = await productDao.AddProduct({
+      category_id: 1,
+      product_name,
+      product_price,
+      product_num,
+      product_selling_price: product_price,
+      product_sales: product_num,
+      product_status,
+      product_picture,
+      product_create_time: currentTime,
+      product_intro,
+      product_title: '商品'
+    });
+    ctx.body = {
+      code: '001',
+      data: Product
+    };
+  },
+  /**
+   * 修改商品
+   * @param {Object} ctx
+   */
+  UpdateProduct: async (ctx) => {
+    let {
+      product_id,
+      product_name,
+      product_price,
+      product_num,
+      product_status,
+      product_picture,
+      product_intro
+    } = ctx.request.body;
+    // 获取当前时间
+    const currentTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    // 修改商品
+    const Product = await productDao.UpdateProduct({
+      category_id: 1,
+      product_id,
+      product_name,
+      product_price,
+      product_num,
+      product_sales: product_num,
+      product_status,
+      product_selling_price: product_price,
+      product_picture,
+      product_create_time: currentTime,
+      product_intro,
+      product_title: '商品'
+    });
+    ctx.body = {
+      code: '001',
+      data: Product
+    };
+  },
+  /**
+   * 删除商品
+   * @param {Object} ctx
+   */
+  DeleteProduct: async (ctx) => {
+    let { product_id } = ctx.request.body;
+    // 删除商品
+    const Product = await productDao.DeleteProduct(product_id);
+    ctx.body = {
+      code: '001',
+      data: Product
+    };
   }
-}
+};
