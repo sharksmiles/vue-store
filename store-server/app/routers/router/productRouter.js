@@ -16,5 +16,6 @@ productRouter
   .post('/product/addProduct', productController.AddProduct)
   .post('/product/updateProduct', productController.UpdateProduct)
   .post('/product/deleteProduct', productController.DeleteProduct)
+  .post('/product/uploadPicture', productController.UploadProductPicture)
   
 module.exports = productRouter;

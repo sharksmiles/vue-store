@@ -1,4 +1,7 @@
 const productDao = require('../models/dao/productDao');
+const fs = require('fs');
+const path = require('path');
+
 module.exports = {
   /**
    * 获取商品分类
@@ -246,5 +249,61 @@ module.exports = {
       code: '001',
       data: Product
     };
+  },
+  /**
+   * 上传商品图片
+   * @param {Object} ctx
+   */
+  UploadProductPicture: async (ctx) => {
+    try {
+      // 获取上传的文件
+      const file = ctx.request.files.file;
+
+      // 生成文件名
+      const fileName = `${Date.now()}_${file.name}`;
+
+      // 设置保存路径
+      const uploadDir = path.join(__dirname, '../../public/upload');
+      const filePath = path.join(uploadDir, fileName);
+      console.log(uploadDir, 'uploadDir=====');
+
+      // 检查目录是否存在，如果不存在则创建
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      // 创建可读流
+      const reader = fs.createReadStream(file.path);
+      // 创建可写流
+      const writer = fs.createWriteStream(filePath);
+
+      // 通过管道来传输流
+      reader.pipe(writer);
+
+      // 监听写入完成事件
+      await new Promise((resolve, reject) => {
+        writer.on('finish', () => {
+          console.log('文件写入完成');
+          resolve();
+        });
+
+        writer.on('error', (err) => {
+          console.error('文件写入出错:', err);
+          reject(err);
+        });
+      });
+
+      // 返回文件访问路径
+      ctx.body = {
+        code: '001',
+        data: `public/upload/${fileName}`
+      };
+    } catch (error) {
+      console.error('上传文件出错:', error);
+      ctx.body = {
+        code: '002',
+        message: '上传文件出错'
+      };
+    }
   }
 };

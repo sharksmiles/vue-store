@@ -45,6 +45,8 @@ CREATE TABLE product(
   product_selling_price double not null,
   product_num int not null,
   product_sales int not null,
+  product_status int not null,
+  product_create_time datetime not null,
   constraint FK_product_category foreign key (category_id) references category (category_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
