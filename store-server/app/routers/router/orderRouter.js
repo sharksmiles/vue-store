@@ -7,5 +7,7 @@ let orderRouter = new Router();
 orderRouter
   .post('/user/order/getOrder', orderController.GetOrder)
   .post('/user/order/addOrder', orderController.AddOrder)
+  .get('/all/order', orderController.GetAllOrder)
+
 
 module.exports = orderRouter;
