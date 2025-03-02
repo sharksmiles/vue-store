@@ -1,15 +1,14 @@
-
-const orderDao = require('../models/dao/orderDao');
-const shoppingCartDao = require('../models/dao/shoppingCartDao');
-const productDao = require('../models/dao/productDao');
-const checkLogin = require('../middleware/checkLogin');
+const orderDao = require("../models/dao/orderDao");
+const shoppingCartDao = require("../models/dao/shoppingCartDao");
+const productDao = require("../models/dao/productDao");
+const checkLogin = require("../middleware/checkLogin");
 
 module.exports = {
   /**
    * 获取用户的所有订单信息
    * @param {Object} ctx
    */
-  GetOrder: async ctx => {
+  GetOrder: async (ctx) => {
     let { user_id } = ctx.request.body;
     // 校验用户是否登录
     if (!checkLogin(ctx, user_id)) {
@@ -21,9 +20,9 @@ module.exports = {
     // 该用户没有订单,直接返回信息
     if (ordersGroup.length == 0) {
       ctx.body = {
-        code: '002',
-        msg: '该用户没有订单信息'
-      }
+        code: "002",
+        msg: "该用户没有订单信息",
+      };
       return;
     }
 
@@ -52,10 +51,9 @@ module.exports = {
     }
 
     ctx.body = {
-      code: '001',
-      orders: ordersList
-    }
-
+      code: "001",
+      orders: ordersList,
+    };
   },
   /**
    * 添加用户订单信息
@@ -77,7 +75,14 @@ module.exports = {
     // 根据数据库表结构生成字段信息
     for (let i = 0; i < products.length; i++) {
       const temp = products[i];
-      let product = [orderID, user_id, temp.productID, temp.num, temp.price, timeTemp];
+      let product = [
+        orderID,
+        user_id,
+        temp.productID,
+        temp.num,
+        temp.price,
+        timeTemp,
+      ];
       data.push(...product);
     }
 
@@ -91,30 +96,41 @@ module.exports = {
         let rows = 0;
         for (let i = 0; i < products.length; i++) {
           const temp = products[i];
-          const res = await shoppingCartDao.DeleteShoppingCart(user_id, temp.productID);
+          const res = await shoppingCartDao.DeleteShoppingCart(
+            user_id,
+            temp.productID
+          );
           rows += res.affectedRows;
         }
         //判断删除购物车是否成功
         if (rows != products.length) {
           ctx.body = {
-            code: '002',
-            msg: '购买成功,但购物车没有更新成功'
-          }
+            code: "002",
+            msg: "购买成功,但购物车没有更新成功",
+          };
           return;
         }
 
         ctx.body = {
-          code: '001',
-          msg: '购买成功'
-        }
+          code: "001",
+          msg: "购买成功",
+        };
       } else {
         ctx.body = {
-          code: '004',
-          msg: '购买失败,未知原因'
-        }
+          code: "004",
+          msg: "购买失败,未知原因",
+        };
       }
     } catch (error) {
       reject(error);
     }
-  }
-}
+  },
+  GetAllOrder: async (ctx) => {
+    // 获取所有的订单
+    const orders = await orderDao.GetAllOrder();
+    ctx.body = {
+      code: "001",
+      orders: orders,
+    };
+  },
+};
