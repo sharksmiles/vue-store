@@ -59,10 +59,23 @@ module.exports = {
     const sql = 'select * from product_picture where product_id = ? ';
     return await db.query(sql, productID);
   },
+
   // 连接数据库,添加商品
   AddProduct: async (product) => {
     const sql = 'insert into product set ?';
-    return await db.query(sql, product);
+    const result = await db.query(sql, product);
+    console.log(result, '====');
+
+    const sql2 =
+      'INSERT INTO product_picture (product_id, product_picture, intro) VALUES (?, ?, ?)';
+
+    await db.query(sql2, [
+      result.insertId,
+      product.product_picture,
+      product.product_intro
+    ]);
+
+    return result;
   },
   // 连接数据库,修改商品
   UpdateProduct: async (product) => {
@@ -90,7 +103,7 @@ module.exports = {
     ];
 
     try {
-      const [result] = await db.query(sql, values);
+      const result = await db.query(sql, values);
       return result;
     } catch (error) {
       console.error('更新商品信息时出错:', error);
@@ -99,6 +112,9 @@ module.exports = {
   },
   // 连接数据库,删除商品
   DeleteProduct: async (productID) => {
+    const sql2 = 'delete from product_picture  where product_id = ?';
+    await db.query(sql2, productID);
+
     const sql = 'delete from product where product_id = ?';
     return await db.query(sql, productID);
   }

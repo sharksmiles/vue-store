@@ -82,6 +82,7 @@ module.exports = {
         temp.num,
         temp.price,
         timeTemp,
+        0
       ];
       data.push(...product);
     }
@@ -122,7 +123,7 @@ module.exports = {
         };
       }
     } catch (error) {
-      reject(error);
+      console.log(error);
     }
   },
   GetAllOrder: async (ctx) => {
@@ -133,4 +134,12 @@ module.exports = {
       orders: orders,
     };
   },
+  HandleOrderStatus: async (ctx) => {
+    let { id, order_status } = ctx.request.body;
+    const data = await orderDao.HandleOrderStatus(id, order_status);
+    ctx.body = {
+      code: "001",
+      orders: data,
+    };
+  }
 };

@@ -8,6 +8,7 @@ orderRouter
   .post('/user/order/getOrder', orderController.GetOrder)
   .post('/user/order/addOrder', orderController.AddOrder)
   .get('/all/order', orderController.GetAllOrder)
+  .post('/updateOrderStatus', orderController.HandleOrderStatus)
 
 
 module.exports = orderRouter;

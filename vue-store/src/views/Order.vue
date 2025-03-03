@@ -1,11 +1,13 @@
-
 <template>
   <div class="order">
     <!-- 我的订单头部 -->
     <div class="order-header">
       <div class="order-header-content">
         <p>
-          <i class="el-icon-s-order" style="font-size: 30px;color: #ff6700;"></i>
+          <i
+            class="el-icon-s-order"
+            style="font-size: 30px;color: #ff6700;"
+          ></i>
           我的订单
         </p>
       </div>
@@ -13,13 +15,15 @@
     <!-- 我的订单头部END -->
 
     <!-- 我的订单主要内容 -->
-    <div class="order-content" v-if="orders.length>0">
-      <div class="content" v-for="(item,index) in orders" :key="index">
+    <div class="order-content" v-if="orders.length > 0">
+      <div class="content" v-for="(item, index) in orders" :key="index">
         <ul>
           <!-- 我的订单表头 -->
           <li class="order-info">
-            <div class="order-id">订单编号: {{item[0].order_id}}</div>
-            <div class="order-time">订单时间: {{item[0].order_time | dateFormat}}</div>
+            <div class="order-id">订单编号: {{ item[0].order_id }}</div>
+            <div class="order-time">
+              订单时间: {{ item[0].order_time | dateFormat }}
+            </div>
           </li>
           <li class="header">
             <div class="pro-img"></div>
@@ -31,33 +35,63 @@
           <!-- 我的订单表头END -->
 
           <!-- 订单列表 -->
-          <li class="product-list" v-for="(product,i) in item" :key="i">
+          <li class="product-list" v-for="(product, i) in item" :key="i">
             <div class="pro-img">
-              <router-link :to="{ path: '/goods/details', query: {productID:product.product_id} }">
+              <router-link
+                :to="{
+                  path: '/goods/details',
+                  query: { productID: product.product_id }
+                }"
+              >
                 <img :src="$target + product.product_picture" />
               </router-link>
             </div>
             <div class="pro-name">
               <router-link
-                :to="{ path: '/goods/details', query: {productID:product.product_id} }"
-              >{{product.product_name}}</router-link>
+                :to="{
+                  path: '/goods/details',
+                  query: { productID: product.product_id }
+                }"
+                >{{ product.product_name }}</router-link
+              >
             </div>
-            <div class="pro-price">{{product.product_price}}元</div>
-            <div class="pro-num">{{product.product_num}}</div>
-            <div class="pro-total pro-total-in">{{product.product_price*product.product_num}}元</div>
+            <div class="pro-price">{{ product.product_price }}元</div>
+            <div class="pro-num">{{ product.product_num }}</div>
+            <div class="pro-total pro-total-in">
+              {{ product.product_price * product.product_num }}元
+            </div>
+            <el-button
+              v-if="product.order_status == 1"
+              type="primary"
+              size="mini"
+              style="margin-left:20px;"
+              @click="() => handleComfirm(product)"
+              >确认收货</el-button
+            >
+            <span
+              v-else-if="product.order_status == 0"
+              style="margin-left:30px;"
+              >待发货</span
+            >
+            <span
+              v-else-if="product.order_status == 2"
+              style="margin-left:30px;"
+              >已收货</span
+            >
           </li>
         </ul>
         <div class="order-bar">
           <div class="order-bar-left">
             <span class="order-total">
               共
-              <span class="order-total-num">{{total[index].totalNum}}</span> 件商品
+              <span class="order-total-num">{{ total[index].totalNum }}</span>
+              件商品
             </span>
           </div>
           <div class="order-bar-right">
             <span>
               <span class="total-price-title">合计：</span>
-              <span class="total-price">{{total[index].totalPrice}}元</span>
+              <span class="total-price">{{ total[index].totalPrice }}元</span>
             </span>
           </div>
           <!-- 订单列表END -->
@@ -87,20 +121,42 @@ export default {
   },
   activated() {
     // 获取订单数据
-    this.$axios
-      .post("/api/user/order/getOrder", {
-        user_id: this.$store.getters.getUser.user_id
-      })
-      .then(res => {
-        if (res.data.code === "001") {
-          this.orders = res.data.orders;
-        } else {
-          this.notifyError(res.data.msg);
+    this.getOrder();
+  },
+  methods: {
+    getOrder() {
+      this.$axios
+        .post('/api/user/order/getOrder', {
+          user_id: this.$store.getters.getUser.user_id
+        })
+        .then((res) => {
+          if (res.data.code === '001') {
+            this.orders = res.data.orders;
+          } else {
+            this.notifyError(res.data.msg);
+          }
+        })
+        .catch((err) => {
+          return Promise.reject(err);
+        });
+    },
+    async handleComfirm(product) {
+      try {
+        await this.$confirm('确认收货?', '提示', {
+          type: 'warning'
+        });
+        await this.$axios.post(`/api/updateOrderStatus`, {
+          id: product.id,
+          order_status: 2
+        });
+        this.$message.success('确认收货成功');
+        this.getOrder();
+      } catch (error) {
+        if (error !== 'cancel') {
+          this.$message.error('确认收货失败');
         }
-      })
-      .catch(err => {
-        return Promise.reject(err);
-      });
+      }
+    }
   },
   watch: {
     // 通过订单信息，计算出每个订单的商品数量及总价
@@ -221,7 +277,6 @@ export default {
 }
 .order .content ul .pro-total {
   float: left;
-  width: 160px;
   padding-right: 81px;
   text-align: right;
 }

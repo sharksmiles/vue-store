@@ -9,5 +9,9 @@ userRouter
   .post('/users/miniProgramLogin', userController.miniProgramLogin)
   .post('/users/findUserName', userController.FindUserName)
   .post('/users/register', userController.Register)
+  .get('/users/all', userController.GetAllUser)
+  .post('/users/delete',userController.DeleteUserId)
+  .post('/users/change',userController.ChangeUserInfo)
+
 
 module.exports = userRouter;
